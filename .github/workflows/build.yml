@@ -1,34 +1,31 @@
-name: Android APK CI
+name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
-
-#  ✅  Rename the helper var so Buildozer won’t treat it as a token override
-env:
-  APP_SUBDIR: app
 
 jobs:
   build-android:
+    name: Build for Android
     runs-on: ubuntu-22.04
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # ---- Build the APK ----
       - name: Build APK with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
         with:
-          #  ✅  Run Buildozer from the repo *root* where buildozer.spec lives
+          command: buildozer android debug
           workdir: .
-          #     (If you moved the spec into app/, set workdir: ${{ env.APP_SUBDIR }})
           buildozer_version: stable
-          log_level: 2
 
-      # ---- Publish artifact ----
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: faceapp-apk
+          name: faceapp-android-apk
           path: ${{ steps.buildozer.outputs.filename }}
