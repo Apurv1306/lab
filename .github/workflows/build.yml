@@ -6,8 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+#  ✅  Rename the helper var so Buildozer won’t treat it as a token override
 env:
-  BUILD_DIR: app
+  APP_SUBDIR: app
 
 jobs:
   build-android:
@@ -15,14 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ---- Build the APK ----
       - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1   # marketplace build[18]
-        id: buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
         with:
-          workdir: ${{ env.BUILD_DIR }}
+          #  ✅  Run Buildozer from the repo *root* where buildozer.spec lives
+          workdir: .
+          #     (If you moved the spec into app/, set workdir: ${{ env.APP_SUBDIR }})
           buildozer_version: stable
           log_level: 2
 
+      # ---- Publish artifact ----
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
