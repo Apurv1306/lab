@@ -1,0 +1,30 @@
+name: Android APK CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  BUILD_DIR: app
+
+jobs:
+  build-android:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build APK with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1   # marketplace build[18]
+        id: buildozer
+        with:
+          workdir: ${{ env.BUILD_DIR }}
+          buildozer_version: stable
+          log_level: 2
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: faceapp-apk
+          path: ${{ steps.buildozer.outputs.filename }}
